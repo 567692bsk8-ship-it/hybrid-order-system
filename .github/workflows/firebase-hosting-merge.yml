@@ -12,10 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # Flutter SDK のセットアップ
+      # Flutter SDK のセットアップ (最新の stable を使用)
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.1' # 最新の安定板を使用
           channel: 'stable'
           cache: true
 
