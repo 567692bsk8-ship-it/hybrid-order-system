@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>758001550845-vq8rtf2e0jej9ajk4jmmjr4q3jlpogku.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.758001550845-vq8rtf2e0jej9ajk4jmmjr4q3jlpogku</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBXofyTFckJjzCFfXru1ijJHQQo7H_zS-w</string>
+	<key>GCM_SENDER_ID</key>
+	<string>758001550845</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.keita.mobileOrderApp</string>
+	<key>PROJECT_ID</key>
+	<string>hybrid-order-system</string>
+	<key>STORAGE_BUCKET</key>
+	<string>hybrid-order-system.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:758001550845:ios:771cd49d4324b792df4594</string>
+</dict>
+</plist>

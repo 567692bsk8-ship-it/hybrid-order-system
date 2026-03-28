@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "758001550845",
+    "project_id": "hybrid-order-system",
+    "storage_bucket": "hybrid-order-system.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758001550845:android:2d4d4b91d7ab356cdf4594",
+        "android_client_info": {
+          "package_name": "com.keita.mobile_order_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "758001550845-d5udogjpdmbk2a7slaetmt4ng14nestu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIqYhgQQAAJhnhM3VWoCvLk2Oi-gHauDQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "758001550845-d5udogjpdmbk2a7slaetmt4ng14nestu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
