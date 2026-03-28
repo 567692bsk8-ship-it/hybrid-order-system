@@ -104,38 +104,12 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
               children: [
                 Text('MENU', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 2)),
                 const SizedBox(width: 8),
-                _buildRoleBadge(currentRole, currentTable),
+                _buildRoleBadge(currentRole),
                 // 開発者専用：テーブル番号切り替えプルダウン
                 if (authRole == 'developer')
                   Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.orange.shade800, width: 0.5),
-                      ),
-                      height: 28,
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: currentTable.isEmpty ? 'Dev' : currentTable,
-                          items: ['Dev', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
-                              .map((val) => DropdownMenuItem(
-                                    value: val,
-                                    child: Text(val, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                  ))
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) {
-                              ref.read(currentTableProvider.notifier).setTable(val);
-                            }
-                          },
-                          icon: Icon(Icons.arrow_drop_down, color: Colors.orange.shade800, size: 16),
-                          style: TextStyle(color: Colors.orange.shade800),
-                        ),
-                      ),
-                    ),
+                    padding: const EdgeInsets.only(left: 6),
+                    child: _buildTableDropdown(currentTable, currentRole),
                   ),
               ],
             ),
@@ -147,6 +121,7 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
             onPressed: () => context.push('/history'),
           ),
           // 本来の権限が開発者であれば、いつでもロール切り替えが可能
+          // 開発者専用：ロール切り替えランチャー
           if (authRole == 'developer')
             PopupMenuButton<String>(
               icon: const Icon(Icons.psychology_outlined, color: Colors.orange),
@@ -157,19 +132,13 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
                 const PopupMenuItem(value: 'developer', child: Text('開発者ビュー')),
               ],
             ),
-          // スタッフまたは開発者のみ管理ボタンを表示
-          if (currentRole == 'staff' || currentRole == 'developer') ...[
-            IconButton(
-              icon: const Icon(Icons.tune, color: Color(0xFF006241)),
-              onPressed: () => context.push('/option-management'),
-              tooltip: 'トッピング管理',
-            ),
+          // スタッフまたは開発者のみ「注文管理」ボタンを表示
+          if (currentRole == 'staff' || currentRole == 'developer')
             IconButton(
               icon: const Icon(Icons.admin_panel_settings_outlined, color: Color(0xFF006241)),
               onPressed: () => context.push('/staff-management'),
               tooltip: '注文管理',
             ),
-          ],
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: IconButton(
@@ -301,26 +270,12 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
     );
   }
 
-  Widget _buildRoleBadge(String role, String tableNum) {
-    Color color;
-    String label;
-    
-    switch (role) {
-      case 'developer':
-        color = Colors.orange.shade800;
-        label = 'Developer';
-        break;
-      case 'staff':
-        color = const Color(0xFF006241);
-        label = 'Staff';
-        break;
-      default:
-        color = Colors.grey.shade600;
-        label = 'Table $tableNum';
-    }
+  Widget _buildRoleBadge(String role) {
+    Color color = (role == 'developer') ? Colors.orange.shade800 : const Color(0xFF006241);
+    String label = (role == 'developer') ? 'Developer' : (role == 'staff' ? 'Staff' : 'Customer');
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(4),
@@ -328,10 +283,40 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
       ),
       child: Text(
         label,
-        style: GoogleFonts.outfit(
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          color: color,
+        style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold, color: color),
+      ),
+    );
+  }
+
+  Widget _buildTableDropdown(String currentTable, String role) {
+    Color color = (role == 'developer') ? Colors.orange.shade800 : const Color(0xFF006241);
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color, width: 1),
+      ),
+      height: 24,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: currentTable.isEmpty ? 'Dev' : currentTable,
+          isDense: true,
+          items: ['Dev', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+              .map((val) => DropdownMenuItem(
+                    value: val,
+                    child: Text('T: $val', style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold)),
+                  ))
+              .toList(),
+          onChanged: (val) {
+            if (val != null) {
+              ref.read(currentTableProvider.notifier).setTable(val);
+            }
+          },
+          icon: Icon(Icons.arrow_drop_down, color: color, size: 14),
+          style: TextStyle(color: color),
+          dropdownColor: Colors.white,
         ),
       ),
     );
