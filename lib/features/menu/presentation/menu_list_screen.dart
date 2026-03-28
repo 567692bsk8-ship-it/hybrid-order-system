@@ -105,6 +105,38 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
                 Text('MENU', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 2)),
                 const SizedBox(width: 8),
                 _buildRoleBadge(currentRole, currentTable),
+                // 開発者専用：テーブル番号切り替えプルダウン
+                if (authRole == 'developer')
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.orange.shade800, width: 0.5),
+                      ),
+                      height: 28,
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: currentTable.isEmpty ? 'Dev' : currentTable,
+                          items: ['Dev', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+                              .map((val) => DropdownMenuItem(
+                                    value: val,
+                                    child: Text(val, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                  ))
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              ref.read(currentTableProvider.notifier).setTable(val);
+                            }
+                          },
+                          icon: Icon(Icons.arrow_drop_down, color: Colors.orange.shade800, size: 16),
+                          style: TextStyle(color: Colors.orange.shade800),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ],
@@ -203,11 +235,23 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
                           Container(
                             height: 70,
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: ListView.builder(
+                            child: ListView(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               scrollDirection: Axis.horizontal,
-                              itemCount: categories.length,
-                              itemBuilder: (context, index) => _buildCategoryChip(categories[index]),
+                              children: [
+                                ...categories.map((c) => _buildCategoryChip(c)),
+                                // 最後に「トッピング」チップを追加
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 12),
+                                  child: ActionChip(
+                                    label: Text('トッピング', style: GoogleFonts.notoSansJp(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF006241))),
+                                    avatar: const Icon(Icons.tune, size: 16, color: Color(0xFF006241)),
+                                    backgroundColor: const Color(0xFFD4E9E2),
+                                    onPressed: () => context.push('/option-management'),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           AnimatedContainer(
@@ -421,7 +465,15 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(menu.name, style: GoogleFonts.notoSansJp(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
+                  // 説明文を薄いグレーで表示
+                  Text(
+                    menu.description,
+                    style: GoogleFonts.notoSansJp(fontSize: 10, color: Colors.grey.shade600),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
                   Text('¥${menu.basePrice}', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF006241))),
                 ],
               ),
