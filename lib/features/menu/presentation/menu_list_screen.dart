@@ -226,18 +226,19 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
                                       style: IconButton.styleFrom(backgroundColor: Colors.grey.shade100, foregroundColor: Colors.black54),
                                     ),
                                   ),
-                                // 最後に「トッピング」チップを追加
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 12),
-                                  child: ActionChip(
-                                    label: Text('トッピング', style: GoogleFonts.notoSansJp(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF006241))),
-                                    avatar: const Icon(Icons.tune, size: 18, color: Color(0xFF006241)),
-                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                                    backgroundColor: const Color(0xFFD4E9E2),
-                                    onPressed: () => context.push('/option-management'),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                                // 最後に「トッピング」チップを追加（管理者・開発者のみ）
+                                if (currentRole == 'staff' || currentRole == 'developer')
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 12),
+                                    child: ActionChip(
+                                      label: Text('トッピング', style: GoogleFonts.notoSansJp(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF006241))),
+                                      avatar: const Icon(Icons.tune, size: 18, color: Color(0xFF006241)),
+                                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                      backgroundColor: const Color(0xFFD4E9E2),
+                                      onPressed: () => context.push('/option-management'),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                                    ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
