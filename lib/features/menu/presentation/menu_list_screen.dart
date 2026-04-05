@@ -162,6 +162,13 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
           ),
         ],
       ),
+      floatingActionButton: (currentRole == 'staff' || currentRole == 'developer') 
+        ? FloatingActionButton(
+            onPressed: () => _showEditMenuDialog(context, null), // 引数nullで新規追加
+            backgroundColor: const Color(0xFF006241),
+            child: const Icon(Icons.add, color: Colors.white),
+          )
+        : null,
       body: Column(
         children: [
           // 開発者モードバナー
@@ -209,12 +216,23 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
                               scrollDirection: Axis.horizontal,
                               children: [
                                 ...categories.map((c) => _buildCategoryChip(c)),
+                                // 開発者のみ：カテゴリー追加ボタン
+                                if (currentRole == 'staff' || currentRole == 'developer')
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 12),
+                                    child: IconButton.filledTonal(
+                                      onPressed: () => _showAddCategoryDialog(),
+                                      icon: const Icon(Icons.add, size: 20),
+                                      style: IconButton.styleFrom(backgroundColor: Colors.grey.shade100, foregroundColor: Colors.black54),
+                                    ),
+                                  ),
                                 // 最後に「トッピング」チップを追加
                                 Padding(
                                   padding: const EdgeInsets.only(right: 12),
                                   child: ActionChip(
-                                    label: Text('トッピング', style: GoogleFonts.notoSansJp(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF006241))),
-                                    avatar: const Icon(Icons.tune, size: 16, color: Color(0xFF006241)),
+                                    label: Text('トッピング', style: GoogleFonts.notoSansJp(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF006241))),
+                                    avatar: const Icon(Icons.tune, size: 18, color: Color(0xFF006241)),
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                                     backgroundColor: const Color(0xFFD4E9E2),
                                     onPressed: () => context.push('/option-management'),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
@@ -469,12 +487,13 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
     );
   }
 
-  void _showEditMenuDialog(BuildContext context, MenuModel menu) {
-    final nameController = TextEditingController(text: menu.name);
-    final priceController = TextEditingController(text: menu.basePrice.toString());
-    final descController = TextEditingController(text: menu.description);
-    bool isAvailable = menu.isAvailable;
-    String category = menu.category;
+  void _showEditMenuDialog(BuildContext context, MenuModel? menu) {
+    final nameController = TextEditingController(text: menu?.name ?? '');
+    final priceController = TextEditingController(text: menu?.basePrice.toString() ?? '');
+    final descController = TextEditingController(text: menu?.description ?? '');
+    bool isAvailable = menu?.isAvailable ?? true;
+    String category = menu?.category ?? selectedCategory;
+    String subCategory = menu?.subCategory ?? 'すべて';
 
     showModalBottomSheet(
       context: context,
@@ -494,7 +513,7 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('メニュー編集', style: GoogleFonts.notoSansJp(fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text(menu == null ? '新商品の追加' : 'メニュー編集', style: GoogleFonts.notoSansJp(fontSize: 20, fontWeight: FontWeight.bold)),
                     IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
                   ],
                 ),
@@ -540,41 +559,58 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('削除の確認'),
-                              content: const Text('このメニューを削除してもよろしいですか？'),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('キャンセル')),
-                                TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('削除', style: TextStyle(color: Colors.red))),
-                              ],
-                            ),
-                          );
-                          if (confirm == true) {
-                            await ref.read(menuRepositoryProvider).deleteMenu(menu.id);
-                            if (context.mounted) Navigator.pop(context);
-                          }
-                        },
-                        style: OutlinedButton.styleFrom(foregroundColor: Colors.red, side: const BorderSide(color: Colors.red)),
-                        child: const Text('削除'),
+                    if (menu != null) ...[
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('削除の確認'),
+                                content: const Text('このメニューを削除してもよろしいですか？'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('キャンセル')),
+                                  TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('削除', style: TextStyle(color: Colors.red))),
+                                ],
+                              ),
+                            );
+                            if (confirm == true) {
+                              await ref.read(menuRepositoryProvider).deleteMenu(menu.id);
+                              if (context.mounted) Navigator.pop(context);
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(foregroundColor: Colors.red, side: const BorderSide(color: Colors.red)),
+                          child: const Text('削除'),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
+                      const SizedBox(width: 16),
+                    ],
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () async {
-                          final updatedMenu = menu.copyWith(
+                          final targetMenu = menu ?? MenuModel(
+                            id: '', 
+                            name: '', 
+                            basePrice: 0, 
+                            category: category, 
+                            subCategory: subCategory, 
+                            description: '', 
+                            imageUrl: 'assets/images/ramen.png'
+                          );
+                          
+                          final updatedMenu = targetMenu.copyWith(
                             name: nameController.text,
-                            basePrice: int.tryParse(priceController.text) ?? menu.basePrice,
+                            basePrice: int.tryParse(priceController.text) ?? targetMenu.basePrice,
                             description: descController.text,
                             category: category,
                             isAvailable: isAvailable,
                           );
-                          await ref.read(menuRepositoryProvider).updateMenu(updatedMenu);
+                          
+                          if (menu == null) {
+                            await ref.read(menuRepositoryProvider).addMenu(updatedMenu);
+                          } else {
+                            await ref.read(menuRepositoryProvider).updateMenu(updatedMenu);
+                          }
                           if (context.mounted) Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
@@ -582,7 +618,7 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text('保存する'),
+                        child: Text(menu == null ? '商品を追加する' : '保存する'),
                       ),
                     ),
                   ],
@@ -592,6 +628,40 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showAddCategoryDialog() {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('カテゴリーの追加'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: '例: 期間限定メニュー'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('キャンセル')),
+          ElevatedButton(
+            onPressed: () {
+              // カテゴリー管理は現在は静的リストを表示しているため、
+              // 将来的には Firestore の categories コレクションを監視するように拡張可能。
+              // 今回は操作感のデモとしての追加ロジック。
+              if (controller.text.isNotEmpty) {
+                // ...将来的な実装箇所
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('カテゴリー「${controller.text}」は将来のアップデートで利用可能になります')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF006241), foregroundColor: Colors.white),
+            child: const Text('追加'),
+          ),
+        ],
       ),
     );
   }
